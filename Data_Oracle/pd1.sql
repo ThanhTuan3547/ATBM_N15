@@ -1,8 +1,8 @@
--- 1. Xem danh sách ng??i dùng trong h? th?ng.
+-- 1. Xem danh sÃ¡ch ng??i dÃ¹ng trong h? th?ng.
 SELECT * FROM Dba_users;
 SELECT * FROM ALL_USERS ;
 
---2. Thông tin v? quy?n (privileges) c?a m?i user/ role trên các ??i t??ng d? li?u.
+--2. ThÃ´ng tin v? quy?n (privileges) c?a m?i user/ role trÃªn cÃ¡c ??i t??ng d? li?u.
 SELECT * FROM  USER_TAB_PRIVS WHERE TABLE_NAME = 'BENHNHAN' OR  TABLE_NAME = 'NHANVIEN' ;
 SELECT * FROM USER_TAB_PRIVS;
 
@@ -63,8 +63,8 @@ IS
        COMMIT;
     END createUser;
 
-
--- 4 xóa user
+/
+-- 4 xÃ³a user
 CREATE OR REPLACE PROCEDURE deleteUser(
     ip_username IN NVARCHAR2)
 IS
@@ -84,9 +84,9 @@ exec_commander VARCHAR(1000);
 
 
 -- 5.edit user
-ALTER USER USER_TEMP_02 IDENTIFIED BY USER_TEMP_02;
+--ALTER USER USER_TEMP_02 IDENTIFIED BY USER_TEMP_02;
 
-
+/
 -- 6. t?o role
 CREATE OR REPLACE PROCEDURE proc_createRole(
     ip_rolename IN NVARCHAR2,
@@ -106,8 +106,8 @@ exec_commander varchar(1000);
         EXECUTE IMMEDIATE(exec_commander);
     COMMIT;
     END proc_createRole;
-
--- 7. xóa role
+/
+-- 7. xÃ³a role
 CREATE OR REPLACE PROCEDURE proc_deleteRole(
 ip_rolename IN NVARCHAR2)
 IS 
@@ -124,7 +124,7 @@ BEGIN
       EXECUTE IMMEDIATE(exec_commander);
 COMMIT;
 END proc_deleteRole;
-
+/
 -- 8 cap role cho user 
 CREATE OR REPLACE PROCEDURE proc_grantRole(
     ip_rolename IN VARCHAR2,
@@ -144,5 +144,5 @@ exec_commander varchar(1000);
         EXECUTE IMMEDIATE(exec_commander);
     COMMIT;
     END proc_grantRole;
-    
+    /
     
