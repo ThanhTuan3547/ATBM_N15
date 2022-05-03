@@ -39,11 +39,11 @@ GRANT SELECT ON csyt TO role_dep_nghiencuu;
 GRANT SELECT ON BENHNHAN TO role_dep_nghiencuu;
 GRANT SELECT ON DICHVU TO role_dep_nghiencuu;
 --Grant role to user
-GRANT role_dep_nghiencuu TO user_quanly_chuyenmon_01;
-GRANT role_dep_nghiencuu TO user_quanly_chuyenmon_02;
-GRANT role_dep_nghiencuu TO user_quanly_chuyenmon_03;
+GRANT role_dep_nghiencuu TO user_nghiencuu_01;
+GRANT role_dep_nghiencuu TO user_nghiencuu_02;
+GRANT role_dep_nghiencuu TO user_nghiencuu_03;
 
-CREATE OR REPLACE FUNCTION FUNC_VPD_POLICY_DOCTOR_HOSOBENHNHAN(
+CREATE OR REPLACE FUNCTION FUNC_VPD_POLICY_NGHIENCUU(
     v_schema IN VARCHAR2,
     v_object IN VARCHAR2
 )
@@ -60,5 +60,5 @@ BEGIN
      predicate:= '';
     END IF;
     RETURN predicate;
-END FUNC_VPD_POLICY_DOCTOR_HOSOBENHNHAN;
+END FUNC_VPD_POLICY_DOCTOR_NGHIENCUU;
 /
