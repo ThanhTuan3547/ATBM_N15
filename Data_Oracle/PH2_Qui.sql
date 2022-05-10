@@ -190,36 +190,6 @@ create role nghiencuu_role;
 create role benhnhan_role;
 ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE;
 
----------- Vai tro cua dba -----------
-
-grant insert, update on CSYT to dba_role;
-
-grant insert on NHANVIEN to dba_role;
-
-grant execute on createUSER to dba_role;
-
----------- Vai tro cua Thanh tra ---------------
-
-grant select on HSBA to thanhtra_role;
-grant select on HSBA_DV to thanhtra_role;
-grant select on CSYT to thanhtra_role;
-grant select on BENHNHAN to thanhtra_role;
-grant select on KHOA to thanhtra_role;
-grant select on DICHVU to thanhtra_role;
-grant select on NHANVIEN to thanhtra_role;
-grant update on NHANVIEN to thanhtra_role;
-
------------ Vai tro cua Nhan vien quan ly ------
-
-grant select, insert, delete on HSBA to nvcsyt_role;
-grant select, insert, delete on HSBA_DV to nvcsyt_role;
-grant select on NHANVIEN to nvcsyt_role;
-grant update on NHANVIEN to nvcsyt_role;
-grant execute on insert_HSBA to nvcsyt_role;
-grant execute on delete_HSBA to nvcsyt_role;
-grant execute on insert_HSBA_DV to nvcsyt_role;
-grant execute on delete_HSBA_DV to nvcsyt_role;
-
 ----------- VPD Xem va sua thong tin ca nhan ------------
 
 create or replace function id_nhanvien(
@@ -330,6 +300,36 @@ END;
 --begin
 --DBMS_RLS.DROP_POLICY('hethong', 'HSBA_DV', 'them_xoa_HSBA_DV');
 --end;
+
+---------- Vai tro cua dba -----------
+
+grant insert, update on CSYT to dba_role;
+
+grant insert on NHANVIEN to dba_role;
+
+grant execute on createUSER to dba_role;
+
+---------- Vai tro cua Thanh tra ---------------
+
+grant select on HSBA to thanhtra_role;
+grant select on HSBA_DV to thanhtra_role;
+grant select on CSYT to thanhtra_role;
+grant select on BENHNHAN to thanhtra_role;
+grant select on KHOA to thanhtra_role;
+grant select on DICHVU to thanhtra_role;
+grant select on NHANVIEN to thanhtra_role;
+grant update on NHANVIEN to thanhtra_role;
+
+----------- Vai tro cua Nhan vien quan ly ------
+
+grant select, insert, delete on HSBA to nvcsyt_role;
+grant select, insert, delete on HSBA_DV to nvcsyt_role;
+grant select on NHANVIEN to nvcsyt_role;
+grant update on NHANVIEN to nvcsyt_role;
+grant execute on insert_HSBA to nvcsyt_role;
+grant execute on delete_HSBA to nvcsyt_role;
+grant execute on insert_HSBA_DV to nvcsyt_role;
+grant execute on delete_HSBA_DV to nvcsyt_role;
 
 ----- Gan role cho cac user -----------------
 
