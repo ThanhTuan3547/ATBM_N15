@@ -55,7 +55,46 @@ END createUser_benhnhan;
 /
 --exec createuser_benhnhan();
 
-
+-- Tao 1 tai khoan cho nguoi dung nhan vien hoac benh nhan:
+CREATE OR REPLACE PROCEDURE createUser(
+    pi_username IN NVARCHAR2,
+    pi_password IN NVARCHAR2)
+IS    
+    user_name  NVARCHAR2(20):= pi_username;
+    pwd NVARCHAR2(20):= pi_password;
+    li_count INTEGER :=0;
+    lv_stmt VARCHAR(1000);
+    BEGIN
+    SELECT COUNT (1)
+    INTO li_count
+    FROM all_users
+    WHERE username =UPPER(user_name);
+    IF li_count !=0
+    THEN 
+        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
+        EXECUTE IMMEDIATE (lv_stmt);
+        
+        lv_stmt:='DROP USER ' ||user_name ||' CASCADE';
+        EXECUTE IMMEDIATE (lv_stmt);
+        
+        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
+        EXECUTE IMMEDIATE (lv_stmt);
+    END IF;
+    
+    lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
+    EXECUTE IMMEDIATE (lv_stmt);
+    
+    lv_stmt:='CREATE USER ' || user_name|| ' IDENTIFIED BY ' || pwd;
+    EXECUTE IMMEDIATE (lv_stmt);
+    
+    lv_stmt:='GRANT CONNECT TO ' ||user_name;
+    EXECUTE IMMEDIATE (lv_stmt);
+    
+    lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
+    EXECUTE IMMEDIATE (lv_stmt);
+    
+    COMMIT;
+END createUser;
 -- Store procedure Gan Role cho User
 create or replace procedure GanRole_Nhanvien(begin_number in number, end_number in number, role_name in varchar2)
 is
@@ -156,6 +195,8 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE;
 grant insert, update on CSYT to dba_role;
 
 grant insert on NHANVIEN to dba_role;
+
+grant execute on createUSER to dba_role;
 
 ---------- Vai tro cua Thanh tra ---------------
 
