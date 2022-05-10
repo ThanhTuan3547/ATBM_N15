@@ -6,31 +6,64 @@ ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'YYYY/MM/DD';
 ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,';
 ALTER SESSION SET NLS_NCHAR_CONV_EXCP = FALSE;
 ALTER SESSION SET TIME_ZONE = '+07:00';
+alter session set container = xepdb1;
+alter session set current_schema = hethong;
 --------------------- TAO USER -------------------------
 create or replace procedure createUser_nhanvien
 IS    
     li_count INTEGER :=0;
-    lv_stmt VARCHAR2(1000);
+    lv_stmt VARCHAR2(1000) := ' ';
 BEGIN
     FOR loop_counter IN 1..605
     LOOP
         lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
         EXECUTE IMMEDIATE (lv_stmt);
-
+        if loop_counter != 250 and loop_counter != 300 then
+        
         lv_stmt:='CREATE USER ' || 'NV' || loop_counter || ' IDENTIFIED BY ' || '123456';
         EXECUTE IMMEDIATE (lv_stmt);
     
-        lv_stmt:='GRANT CONNECT TO ' || 'NV' || loop_counter;
+        lv_stmt:='GRANT create session  TO ' || 'NV' || loop_counter;
         EXECUTE IMMEDIATE (lv_stmt);
+        end if;
 
         lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
         EXECUTE IMMEDIATE (lv_stmt);
     END LOOP;
 COMMIT;
 END createUser_nhanvien;
-
---exec createuser_nhanvien();
 /
+
+--create or replace procedure dropUser_nhanvien
+--IS    
+--    li_count INTEGER :=0;
+--    lv_stmt VARCHAR2(1000) := ' ';
+--BEGIN
+--    FOR loop_counter IN 1..605
+--    LOOP
+--        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
+--        EXECUTE IMMEDIATE (lv_stmt);
+--        if loop_counter != 250 and loop_counter != 300 then
+--        
+--        lv_stmt:='drop USER ' || 'NV' || loop_counter ;
+--        EXECUTE IMMEDIATE (lv_stmt);
+--    
+--        --lv_stmt:='GRANT CREATE SESSION TO ' || 'NV' || loop_counter;
+--        --EXECUTE IMMEDIATE (lv_stmt);
+--        end if;
+--
+--        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
+--        EXECUTE IMMEDIATE (lv_stmt);
+--    END LOOP;
+--COMMIT;
+--END dropUser_nhanvien;
+--/
+-- drop user  nv1;
+-- select * from public.all_user; 
+-- exec dropUser_nhanvien();
+--exec createuser_nhanvien();
+--/
+
 create or replace procedure createUser_benhnhan 
 IS    
     li_count INTEGER :=0;
@@ -44,7 +77,7 @@ BEGIN
         lv_stmt:='CREATE USER ' || 'BN' || loop_counter || ' IDENTIFIED BY ' || '123456';
         EXECUTE IMMEDIATE (lv_stmt);
     
-        lv_stmt:='GRANT CONNECT TO ' || 'BN' || loop_counter;
+        lv_stmt:='GRANT create session TO ' || 'BN' || loop_counter;
         EXECUTE IMMEDIATE (lv_stmt);
 
         lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
@@ -53,6 +86,32 @@ BEGIN
 COMMIT;
 END createUser_benhnhan;
 /
+--create or replace procedure dropUser_benhnhan
+--IS    
+--    li_count INTEGER :=0;
+--    lv_stmt VARCHAR2(1000) := ' ';
+--BEGIN
+--    FOR loop_counter IN 1..10000
+--    LOOP
+--        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
+--        EXECUTE IMMEDIATE (lv_stmt);
+--        
+--        
+--        lv_stmt:='drop USER ' || 'BN' || loop_counter ;
+--        EXECUTE IMMEDIATE (lv_stmt);
+--    
+--        --lv_stmt:='GRANT CREATE SESSION TO ' || 'NV' || loop_counter;
+--        --EXECUTE IMMEDIATE (lv_stmt);
+--       
+--
+--        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
+--        EXECUTE IMMEDIATE (lv_stmt);
+--    END LOOP;
+--COMMIT;
+--END dropUser_benhnhan;
+--/
+-- exec dropUser_benhnhan();
+-- drop user bn1 cascade;
 --exec createuser_benhnhan();
 
 -- Tao 1 tai khoan cho nguoi dung nhan vien hoac benh nhan:
@@ -175,6 +234,7 @@ begin
     END IF;
 commit;
 end;
+/
 ---------- Tao role -----------------
 ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
 create role dba_role;
@@ -189,6 +249,36 @@ create role nghiencuu_role;
 
 create role benhnhan_role;
 ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE;
+
+
+---------- Vai tro cua dba -----------
+
+grant insert, update on CSYT to dba_role;
+
+grant insert on NHANVIEN to dba_role;
+
+
+---------- Vai tro cua Thanh tra ---------------
+
+grant select on HSBA to thanhtra_role;
+grant select on HSBA_DV to thanhtra_role;
+grant select on CSYT to thanhtra_role;
+grant select on BENHNHAN to thanhtra_role;
+grant select on KHOA to thanhtra_role;
+grant select on DICHVU to thanhtra_role;
+grant select on NHANVIEN to thanhtra_role;
+grant update on NHANVIEN to thanhtra_role;
+
+----------- Vai tro cua Nhan vien quan ly ------
+
+grant select, insert, delete on HSBA to nvcsyt_role;
+grant select, insert, delete on HSBA_DV to nvcsyt_role;
+grant select on NHANVIEN to nvcsyt_role;
+grant update on NHANVIEN to nvcsyt_role;
+grant execute on insert_HSBA to nvcsyt_role;
+grant execute on delete_HSBA to nvcsyt_role;
+grant execute on insert_HSBA_DV to nvcsyt_role;
+grant execute on delete_HSBA_DV to nvcsyt_role;
 
 ----------- VPD Xem va sua thong tin ca nhan ------------
 
@@ -296,6 +386,7 @@ policy_function => 'themxoa_hsba_dv',
 statement_types => 'INSERT, DELETE',
 update_check => TRUE);
 END;
+/
 --/
 --begin
 --DBMS_RLS.DROP_POLICY('hethong', 'HSBA_DV', 'them_xoa_HSBA_DV');

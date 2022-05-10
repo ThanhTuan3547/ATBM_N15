@@ -1,3 +1,7 @@
+alter session set "_ORACLE_SCRIPT"=true;  
+alter session set container = xepdb1;
+alter session set current_schema = hethong;
+
 create table HSBA
 (
     MAHSBA NUMBER(8) NOT NULL,
