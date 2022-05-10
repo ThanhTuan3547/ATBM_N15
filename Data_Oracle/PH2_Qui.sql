@@ -189,12 +189,13 @@ as
 begin
     if substr(sys_context('userenv', 'session_user'), 1, 2) = 'NV' then
         return 'MANV = ' || substr(sys_context('userenv', 'session_user'), 3);
+    elsif sys_context('userenv', 'session_user') = 'HETHONG' then
+        return '';
     else
         return 'MANV = ' || 0;
     end if;
     commit;
 end;
-
 --begin
 --DBMS_RLS.DROP_POLICY('hethong', 'NHANVIEN', 'Xem_cap_nhat_nhan_vien');
 --end;
