@@ -6,64 +6,31 @@ ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'YYYY/MM/DD';
 ALTER SESSION SET NLS_NUMERIC_CHARACTERS = '.,';
 ALTER SESSION SET NLS_NCHAR_CONV_EXCP = FALSE;
 ALTER SESSION SET TIME_ZONE = '+07:00';
-alter session set container = xepdb1;
-alter session set current_schema = hethong;
 --------------------- TAO USER -------------------------
 create or replace procedure createUser_nhanvien
 IS    
     li_count INTEGER :=0;
-    lv_stmt VARCHAR2(1000) := ' ';
+    lv_stmt VARCHAR2(1000);
 BEGIN
     FOR loop_counter IN 1..605
     LOOP
         lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
         EXECUTE IMMEDIATE (lv_stmt);
-        if loop_counter != 250 and loop_counter != 300 then
-        
+
         lv_stmt:='CREATE USER ' || 'NV' || loop_counter || ' IDENTIFIED BY ' || '123456';
         EXECUTE IMMEDIATE (lv_stmt);
     
-        lv_stmt:='GRANT create session  TO ' || 'NV' || loop_counter;
+        lv_stmt:='GRANT CONNECT TO ' || 'NV' || loop_counter;
         EXECUTE IMMEDIATE (lv_stmt);
-        end if;
 
         lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
         EXECUTE IMMEDIATE (lv_stmt);
     END LOOP;
 COMMIT;
 END createUser_nhanvien;
-/
 
---create or replace procedure dropUser_nhanvien
---IS    
---    li_count INTEGER :=0;
---    lv_stmt VARCHAR2(1000) := ' ';
---BEGIN
---    FOR loop_counter IN 1..605
---    LOOP
---        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
---        EXECUTE IMMEDIATE (lv_stmt);
---        if loop_counter != 250 and loop_counter != 300 then
---        
---        lv_stmt:='drop USER ' || 'NV' || loop_counter ;
---        EXECUTE IMMEDIATE (lv_stmt);
---    
---        --lv_stmt:='GRANT CREATE SESSION TO ' || 'NV' || loop_counter;
---        --EXECUTE IMMEDIATE (lv_stmt);
---        end if;
---
---        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
---        EXECUTE IMMEDIATE (lv_stmt);
---    END LOOP;
---COMMIT;
---END dropUser_nhanvien;
---/
--- drop user  nv1;
--- select * from public.all_user; 
--- exec dropUser_nhanvien();
 --exec createuser_nhanvien();
---/
-
+/
 create or replace procedure createUser_benhnhan 
 IS    
     li_count INTEGER :=0;
@@ -77,7 +44,7 @@ BEGIN
         lv_stmt:='CREATE USER ' || 'BN' || loop_counter || ' IDENTIFIED BY ' || '123456';
         EXECUTE IMMEDIATE (lv_stmt);
     
-        lv_stmt:='GRANT create session TO ' || 'BN' || loop_counter;
+        lv_stmt:='GRANT CONNECT TO ' || 'BN' || loop_counter;
         EXECUTE IMMEDIATE (lv_stmt);
 
         lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
@@ -86,32 +53,6 @@ BEGIN
 COMMIT;
 END createUser_benhnhan;
 /
---create or replace procedure dropUser_benhnhan
---IS    
---    li_count INTEGER :=0;
---    lv_stmt VARCHAR2(1000) := ' ';
---BEGIN
---    FOR loop_counter IN 1..10000
---    LOOP
---        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
---        EXECUTE IMMEDIATE (lv_stmt);
---        
---        
---        lv_stmt:='drop USER ' || 'BN' || loop_counter ;
---        EXECUTE IMMEDIATE (lv_stmt);
---    
---        --lv_stmt:='GRANT CREATE SESSION TO ' || 'NV' || loop_counter;
---        --EXECUTE IMMEDIATE (lv_stmt);
---       
---
---        lv_stmt:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
---        EXECUTE IMMEDIATE (lv_stmt);
---    END LOOP;
---COMMIT;
---END dropUser_benhnhan;
---/
--- exec dropUser_benhnhan();
--- drop user bn1 cascade;
 --exec createuser_benhnhan();
 
 -- Tao 1 tai khoan cho nguoi dung nhan vien hoac benh nhan:
@@ -154,6 +95,25 @@ IS
     
     COMMIT;
 END createUser;
+
+CREATE OR REPLACE PROCEDURE deleteUser(
+    ip_username IN NVARCHAR2)
+IS
+user_name NVARCHAR2(20):=ip_username;
+exec_commander VARCHAR(1000);
+    BEGIN
+        exec_commander := 'ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE ';
+        EXECUTE IMMEDIATE (exec_commander);
+        
+        exec_commander :='DROP USER ' || user_name|| ' CASCADE ';
+        EXECUTE IMMEDIATE (exec_commander);
+        
+        exec_commander := 'ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE ';
+        EXECUTE IMMEDIATE (exec_commander);
+        
+        COMMIT;    
+END deleteUser;
+
 -- Store procedure Gan Role cho User
 create or replace procedure GanRole_Nhanvien(begin_number in number, end_number in number, role_name in varchar2)
 is
@@ -170,6 +130,40 @@ begin
         exec_commander:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE';
         EXECUTE IMMEDIATE(exec_commander);
      END LOOP;   
+commit;
+end;
+/
+
+create or replace procedure GanRole_BENHNHAN(begin_number in number, end_number in number, role_name in varchar2)
+is
+exec_commander varchar(1000);
+begin
+    FOR loop_counter IN begin_number..end_number
+    LOOP
+        exec_commander:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE';
+        EXECUTE IMMEDIATE(exec_commander);
+
+        exec_commander:='GRANT ' || role_name || ' TO ' || 'BN' || loop_counter;
+        EXECUTE IMMEDIATE(exec_commander);
+        
+        exec_commander:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE';
+        EXECUTE IMMEDIATE(exec_commander);
+     END LOOP;   
+commit;
+end;
+/
+create or replace procedure GanRole_user(user_name in varchar2, role_name in varchar2)
+is
+exec_commander varchar(1000);
+begin
+    exec_commander:='ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE';
+    EXECUTE IMMEDIATE(exec_commander);
+
+    exec_commander:='GRANT ' || role_name || ' TO ' || user_name;
+    EXECUTE IMMEDIATE(exec_commander);
+        
+    exec_commander:='ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE';
+    EXECUTE IMMEDIATE(exec_commander); 
 commit;
 end;
 /
@@ -235,6 +229,16 @@ begin
 commit;
 end;
 /
+create or replace function take_vaitro
+return varchar2
+as
+ip_result varchar2(100);
+begin
+    select VAITRO into ip_result
+    from NHANVIEN
+    where MANV = substr(sys_context('userenv', 'session_user'), 3);
+    return ip_result;
+end;
 ---------- Tao role -----------------
 ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
 create role dba_role;
@@ -250,36 +254,6 @@ create role nghiencuu_role;
 create role benhnhan_role;
 ALTER SESSION SET "_ORACLE_SCRIPT"=FALSE;
 
-
----------- Vai tro cua dba -----------
-
-grant insert, update on CSYT to dba_role;
-
-grant insert on NHANVIEN to dba_role;
-
-
----------- Vai tro cua Thanh tra ---------------
-
-grant select on HSBA to thanhtra_role;
-grant select on HSBA_DV to thanhtra_role;
-grant select on CSYT to thanhtra_role;
-grant select on BENHNHAN to thanhtra_role;
-grant select on KHOA to thanhtra_role;
-grant select on DICHVU to thanhtra_role;
-grant select on NHANVIEN to thanhtra_role;
-grant update on NHANVIEN to thanhtra_role;
-
------------ Vai tro cua Nhan vien quan ly ------
-
-grant select, insert, delete on HSBA to nvcsyt_role;
-grant select, insert, delete on HSBA_DV to nvcsyt_role;
-grant select on NHANVIEN to nvcsyt_role;
-grant update on NHANVIEN to nvcsyt_role;
-grant execute on insert_HSBA to nvcsyt_role;
-grant execute on delete_HSBA to nvcsyt_role;
-grant execute on insert_HSBA_DV to nvcsyt_role;
-grant execute on delete_HSBA_DV to nvcsyt_role;
-
 ----------- VPD Xem va sua thong tin ca nhan ------------
 
 create or replace function id_nhanvien(
@@ -292,13 +266,15 @@ begin
         return 'MANV = ' || substr(sys_context('userenv', 'session_user'), 3);
     elsif sys_context('userenv', 'session_user') = 'HETHONG' then
         return '';
+    elsif substr(sys_context('userenv', 'session_user'), 1, 3) = 'DBA' then
+        return '';
     else
         return 'MANV = ' || 0;
     end if;
     commit;
 end;
 --begin
---DBMS_RLS.DROP_POLICY('hethong', 'NHANVIEN', 'Xem_cap_nhat_nhan_vien');
+--.DROP_POLICY('hethong', 'NHANVIEN', 'Xem_cap_nhat_nhan_vien');
 --end;
 /
 BEGIN DBMS_RLS.add_policy
@@ -307,21 +283,49 @@ object_name => 'NHANVIEN',
 policy_name => 'Xem_cap_nhat_nhan_vien',
 function_schema => 'hethong',
 policy_function => 'id_nhanvien',
-statement_types => 'SELECT, UPDATE');
+statement_types => 'SELECT, UPDATE',
+update_check => TRUE);
 END;
 /
------- VPD Them xoa sua 
+BEGIN DBMS_RLS.add_policy
+(object_schema => 'hethong',
+object_name => 'NHANVIEN',
+policy_name => 'Them_nhan_vien',
+function_schema => 'hethong',
+policy_function => 'id_nhanvien',
+statement_types => 'INSERT',
+update_check => TRUE);
+END;
+/
+--begin
+--DBMS_RLS.DROP_POLICY('hethong', 'NHANVIEN', 'Them_nhan_vien');
+--end;
+------ VPD Them xoa sua HSBA ---------------
 create or replace function themxoa_hsba(
 p_schema in varchar2 default null,
 p_object in varchar2 default null)
 return varchar2
 as
-ip_result number;
+ip_result1 number;
+ip_result2 number;
+ip_vaitro varchar2(100);
 begin
-    select CSYT into ip_result
-    from NHANVIEN
-    where MANV = substr(sys_context('userenv', 'session_user'), 3);
-    return 'MACSYT = ' || ip_result;
+    ip_vaitro := take_vaitro();
+    if ip_vaitro = 'Co so y te' then
+        select CSYT into ip_result1
+        from NHANVIEN
+        where MANV = substr(sys_context('userenv', 'session_user'), 3);
+        return 'MACSYT = ' || ip_result1;
+    elsif ip_vaitro = 'Thanh tra' then
+        return '';
+    elsif ip_vaitro = 'Bac si' or ip_vaitro = 'Y si' then
+        return 'MABS = ' || substr(sys_context('userenv', 'session_user'), 3);
+    elsif ip_vaitro = 'Nghien cuu' then
+        select CSYT, CHUYENKHOA into ip_result1, ip_result2
+        from NHANVIEN
+        where MANV = substr(sys_context('userenv', 'session_user'), 3);
+        return 'MACSYT = ' || ip_result1 || ' and ' || 'MAKHOA = ' || ip_result2;
+    end if;
 end;
 /
 BEGIN DBMS_RLS.add_policy
@@ -358,10 +362,15 @@ p_schema in varchar2 default null,
 p_object in varchar2 default null)
 return varchar2
 as
+ip_vaitro varchar2(100);
 begin
-    return 'MAHSBA in (select h.mahsba
-    from NHANVIEN nv, HSBA h 
-    where MANV = substr(USER, 3) and nv.CSYT = h.macsyt)';
+    ip_vaitro := take_vaitro();
+    if ip_vaitro = 'Thanh tra' then
+        return '';
+    else
+        return 'MAHSBA in (select h.mahsba
+        from HSBA h)';
+    end if;
 end;
 /
 BEGIN DBMS_RLS.add_policy
@@ -387,18 +396,52 @@ statement_types => 'INSERT, DELETE',
 update_check => TRUE);
 END;
 /
---/
 --begin
 --DBMS_RLS.DROP_POLICY('hethong', 'HSBA_DV', 'them_xoa_HSBA_DV');
+--end;
+
+---------- VPD xem thong tin benh nhan --------
+
+create or replace function id_benhnhan(
+p_schema in varchar2 default null,
+p_object in varchar2 default null)
+return varchar2
+as
+ip_vaitro varchar2(100);
+begin
+    if substr(sys_context('userenv', 'session_user'), 1, 2) = 'BN' then
+        return 'MABN = ' || substr(sys_context('userenv', 'session_user'), 3);
+    elsif sys_context('userenv', 'session_user') = 'HETHONG' or ip_vaitro = 'Bac si' or ip_vaitro = 'Y si' then
+        return '';
+    else
+        return 'MABN = ' || 0;
+    end if;
+    commit;
+end;
+/
+BEGIN DBMS_RLS.add_policy
+(object_schema => 'hethong',
+object_name => 'BENHNHAN',
+policy_name => 'Xem_cap_nhat_benh_nhan',
+function_schema => 'hethong',
+policy_function => 'id_benhnhan',
+statement_types => 'SELECT, UPDATE',
+update_check => TRUE);
+END;
+--begin
+--DBMS_RLS.DROP_POLICY('hethong', 'BENHNHAN', 'Xem_cap_nhat_benh_nhan');
 --end;
 
 ---------- Vai tro cua dba -----------
 
 grant insert, update on CSYT to dba_role;
 
-grant insert on NHANVIEN to dba_role;
+grant select, insert on NHANVIEN to dba_role;
 
 grant execute on createUSER to dba_role;
+
+exec createUser('DBA1','123456');
+exec createUser('DBA2','123456');
 
 ---------- Vai tro cua Thanh tra ---------------
 
@@ -422,7 +465,32 @@ grant execute on delete_HSBA to nvcsyt_role;
 grant execute on insert_HSBA_DV to nvcsyt_role;
 grant execute on delete_HSBA_DV to nvcsyt_role;
 
+----------- Vai tro cua Bac si / y si ----------
+
+grant select on NHANVIEN to ybacsi_role;
+grant update on NHANVIEN to ybacsi_role;
+grant select on HSBA to ybacsi_role;
+grant select on HSBA_DV to ybacsi_role;
+grant select on BENHNHAN to ybacsi_role;
+
+----------- Vai tro cua Nghien cuu ----------
+
+grant select on NHANVIEN to nghiencuu_role;
+grant update on NHANVIEN to nghiencuu_role;
+grant select on HSBA to nghiencuu_role;
+grant select on HSBA_DV to nghiencuu_role;
+
+------------ Vai tro cua Benh nhan ----------
+
+grant select on BENHNHAN to benhnhan_role;
+grant update on BENHNHAN to benhnhan_role;
+
 ----- Gan role cho cac user -----------------
 
+exec ganrole_user('DBA1', 'dba_role');
+exec ganrole_user('DBA2', 'dba_role');
 exec ganrole_nhanvien(551,555, 'thanhtra_role');
 exec ganrole_nhanvien(556,605, 'nvcsyt_role');
+exec ganrole_nhanvien(1,500, 'ybacsi_role');
+exec ganrole_nhanvien(501,550, 'nghiencuu_role');
+exec ganrole_benhnhan(1,10000, 'benhnhan_role');
