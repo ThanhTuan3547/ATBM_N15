@@ -409,9 +409,10 @@ return varchar2
 as
 ip_vaitro varchar2(100);
 begin
+    ip_vaitro := take_vaitro();
     if substr(sys_context('userenv', 'session_user'), 1, 2) = 'BN' then
         return 'MABN = ' || substr(sys_context('userenv', 'session_user'), 3);
-    elsif sys_context('userenv', 'session_user') = 'HETHONG' or ip_vaitro = 'Bac si' or ip_vaitro = 'Y si' then
+    elsif sys_context('userenv', 'session_user') = 'HETHONG' or ip_vaitro = 'Bac si' or ip_vaitro = 'Y si' or ip_vaitro = 'Thanh tra' then
         return '';
     else
         return 'MABN = ' || 0;
@@ -419,15 +420,6 @@ begin
     commit;
 end;
 /
-BEGIN DBMS_RLS.add_policy
-(object_schema => 'hethong',
-object_name => 'BENHNHAN',
-policy_name => 'Xem_cap_nhat_benh_nhan',
-function_schema => 'hethong',
-policy_function => 'id_benhnhan',
-statement_types => 'SELECT, UPDATE',
-update_check => TRUE);
-END;
 --begin
 --DBMS_RLS.DROP_POLICY('hethong', 'BENHNHAN', 'Xem_cap_nhat_benh_nhan');
 --end;
