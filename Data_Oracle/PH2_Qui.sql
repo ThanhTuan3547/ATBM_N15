@@ -95,7 +95,7 @@ IS
     
     COMMIT;
 END createUser;
-
+/
 CREATE OR REPLACE PROCEDURE deleteUser(
     ip_username IN NVARCHAR2)
 IS
@@ -113,7 +113,7 @@ exec_commander VARCHAR(1000);
         
         COMMIT;    
 END deleteUser;
-
+/
 -- Store procedure Gan Role cho User
 create or replace procedure GanRole_Nhanvien(begin_number in number, end_number in number, role_name in varchar2)
 is
@@ -239,6 +239,7 @@ begin
     where MANV = substr(sys_context('userenv', 'session_user'), 3);
     return ip_result;
 end;
+/
 ---------- Tao role -----------------
 ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
 create role dba_role;
@@ -274,7 +275,7 @@ begin
     commit;
 end;
 --begin
---.DROP_POLICY('hethong', 'NHANVIEN', 'Xem_cap_nhat_nhan_vien');
+--DBMS_RLS.DROP_POLICY('hethong', 'NHANVIEN', 'Xem_cap_nhat_nhan_vien');
 --end;
 /
 BEGIN DBMS_RLS.add_policy
@@ -414,12 +415,19 @@ begin
         return 'MABN = ' || substr(sys_context('userenv', 'session_user'), 3);
     elsif sys_context('userenv', 'session_user') = 'HETHONG' or ip_vaitro = 'Bac si' or ip_vaitro = 'Y si' or ip_vaitro = 'Thanh tra' then
         return '';
-    else
-        return 'MABN = ' || 0;
     end if;
     commit;
 end;
 /
+BEGIN DBMS_RLS.add_policy
+(object_schema => 'hethong',
+object_name => 'BENHNHAN',
+policy_name => 'Xem_cap_nhat_benh_nhan',
+function_schema => 'hethong',
+policy_function => 'id_benhnhan',
+statement_types => 'SELECT, UPDATE',
+update_check => TRUE);
+END;
 --begin
 --DBMS_RLS.DROP_POLICY('hethong', 'BENHNHAN', 'Xem_cap_nhat_benh_nhan');
 --end;
@@ -479,6 +487,8 @@ grant update on BENHNHAN to benhnhan_role;
 
 ----- Gan role cho cac user -----------------
 
+exec createUSER_NHANVIEN;
+exec createUSER_benhnhan;
 exec ganrole_user('DBA1', 'dba_role');
 exec ganrole_user('DBA2', 'dba_role');
 exec ganrole_nhanvien(551,555, 'thanhtra_role');
